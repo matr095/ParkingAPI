@@ -6,6 +6,12 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+    <ul>
+	    {% for bordeauxPark in bordeauxParks %}
+	        	<li>Nom = {{bordeauxPark[0]}}</li>
+	        	<li>Xlat = {{bordeauxPark[1]}}</li>
+	        	<li>Ylng = {{bordeauxPark[2]}}</li>
+	    {% endfor %}
+	</ul>
 </body>
 </html>

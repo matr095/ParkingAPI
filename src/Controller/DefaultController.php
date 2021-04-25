@@ -20,17 +20,26 @@ class DefaultController extends AbstractController
 
         $crawler = new Crawler($xml);
 
-        $crawler->filter('wfs|FeatureCollection > gml|featureMember > bm|ST_PARK_P > bm|NOM')->each(function (Crawler $actualPark, $i) {
-                $parkList[$i] = [];
-                $parkList[$i][] = $actualPark->text();
+        $parkNames = $crawler->filter('wfs|FeatureCollection > gml|featureMember > bm|ST_PARK_P > bm|NOM')->each(function (Crawler $actualPark, $i) {
+                return $actualPark->text();
         });
-        $crawler->filter('wfs|FeatureCollection > gml|featureMember > bm|ST_PARK_P > bm|geometry > gml|Point > gml|pos')->each(function (Crawler $actualPark, $i) {
-                $parkList[$i][] = explode(' ', $actualPark->text())[0];
+
+        $parkLats = $crawler->filter('wfs|FeatureCollection > gml|featureMember > bm|ST_PARK_P > bm|geometry > gml|Point > gml|pos')->each(function (Crawler $actualPark, $i) {
+                return explode(' ', $actualPark->text())[0];
         });
-        $crawler->filter('wfs|FeatureCollection > gml|featureMember > bm|ST_PARK_P > bm|geometry > gml|Point > gml|pos')->each(function (Crawler $actualPark, $i) {
-                $parkList[$i][] = explode(' ', $actualPark->text())[1];
+        $parkLngs = $crawler->filter('wfs|FeatureCollection > gml|featureMember > bm|ST_PARK_P > bm|geometry > gml|Point > gml|pos')->each(function (Crawler $actualPark, $i) {
+                return explode(' ', $actualPark->text())[1];
         });
-        
+
+        foreach($parkNames as $keyParkName=>$valueParkName) {
+            foreach($parkLats as $keyParkLat=>$valueParkLat) {
+                foreach($parkLngs as $keyParkLng=>$valueParkLng) {
+                    if($keyParkName == $keyParkLat && $keyParkLat == $keyParkLng) {
+                        $parkList[] = [$valueParkName, $valueParkLat, $valueParkLng];
+                    }
+                }
+            }
+        }
         
         return $parkList;
     }
@@ -38,9 +47,7 @@ class DefaultController extends AbstractController
     public function index(): Response
     {
         $bordeauxParks = $this->getBordeaux();
-        $number = 1;
         return $this->render('default/index.html.twig', [
-            'number' => $number,
             'bordeauxParks' => $bordeauxParks
         ]);
     }
